@@ -134,4 +134,61 @@ class Gif extends AbstractMediaType
 
         return $this;
     }
+
+    /**
+     * save as a quality gif
+     *
+     * @param string $pathfile
+     * @param int $fps
+     * @return $this
+     */
+    public function save_with_high_quality(string $pathfile, int $fps)
+    {
+        /**
+         * @see http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
+         */
+
+        $filters = "fps=$fps,scale=".$this->dimension->getWidth().":-1:flags=lanczos";
+        $palette = "/tmp/video_to_fig_palette.jpg";
+
+        $commands = $commands_2 = array(
+            '-ss', (string)$this->timecode
+        );
+
+        if(null !== $this->duration) {
+            $commands[] = $commands_2[] = '-t';
+            $commands[] = $commands_2[] = (string)$this->duration;
+        }
+
+        $commands[] = $commands_2[] = '-i';
+        $commands[] = $commands_2[] = $this->pathfile;
+        $commands[] = '-vf';
+        $commands[] = $filters.',palettegen';
+        $commands[] = '-y';
+        $commands[] = $palette;
+
+        $commands_2[] = '-i';
+        $commands_2[] = $palette;
+        $commands_2[] = '-lavfi';
+        $commands_2[] = $filters.' [x]; [x][1:v] paletteuse';
+        $commands_2[] = '-y';
+
+        $commands_2 = array_merge($commands_2, array($pathfile));
+
+        try {
+            $this->driver->command($commands);
+        } catch (ExecutionFailureException $e) {
+            $this->cleanupTemporaryFile($pathfile);
+            throw new RuntimeException('Unable to generate palette', $e->getCode(), $e);
+        }
+
+        try {
+            $this->driver->command($commands_2);
+        } catch (ExecutionFailureException $e) {
+            $this->cleanupTemporaryFile($pathfile);
+            throw new RuntimeException('Unable to save gif', $e->getCode(), $e);
+        }
+
+        return $this;
+    }
 }
