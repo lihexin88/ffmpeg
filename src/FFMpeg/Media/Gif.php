@@ -149,7 +149,8 @@ class Gif extends AbstractMediaType
          */
 
         $filters = "fps=$fps,scale=".$this->dimension->getWidth().":-1:flags=lanczos";
-        $palette = "/tmp/video_to_fig_palette.jpg";
+        $fileMd5 = md5_file($this->pathfile);
+        $palette = "/tmp/"."video_to_fig_palette_".$fileMd5.'.jpg';
 
         $commands = $commands_2 = array(
             '-ss', (string)$this->timecode
@@ -188,6 +189,7 @@ class Gif extends AbstractMediaType
             $this->cleanupTemporaryFile($pathfile);
             throw new RuntimeException('Unable to save gif', $e->getCode(), $e);
         }
+        $this->cleanupTemporaryFile($palette);
 
         return $this;
     }
