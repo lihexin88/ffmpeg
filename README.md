@@ -2,6 +2,12 @@
 
 [![Test](https://github.com/PHP-FFMpeg/PHP-FFMpeg/actions/workflows/test.yaml/badge.svg)](https://github.com/PHP-FFMpeg/PHP-FFMpeg/actions/workflows/test.yaml)
 
+
+
+-- based on [php-ffmpeg/php-ffmpeg](https://packagist.org/packages/php-ffmpeg/php-ffmpeg) ,and add save_with_high_quality function to save a quality gif .
+
+
+
 An Object-Oriented library to convert video/audio files with FFmpeg / AVConv.
 
 Check another amazing repo: [PHP FFMpeg extras](https://github.com/alchemy-fr/PHP-FFMpeg-Extras), you will find lots of Audio/Video formats there.
@@ -17,8 +23,8 @@ otherwise you should have to explicitly give the binaries path on load.
 ### Known issues:
 
 - Using rotate and resize will produce a corrupted output when using
-[libav](http://libav.org/) 0.8. The bug is fixed in version 9. This bug does not
-appear in latest ffmpeg version.
+  [libav](http://libav.org/) 0.8. The bug is fixed in version 9. This bug does not
+  appear in latest ffmpeg version.
 
 ## Installation
 
