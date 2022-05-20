@@ -19,6 +19,9 @@ use FFMpeg\FFProbe;
 use FFMpeg\Exception\RuntimeException;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\Coordinate\Dimension;
+use FFMpeg\Filters\Video\ClipFilter;
+use FFMpeg\Format\FormatInterface;
+use FFMpeg\Format\ProgressableInterface;
 
 class Gif extends AbstractMediaType
 {
@@ -142,7 +145,7 @@ class Gif extends AbstractMediaType
      * @param int $fps
      * @return $this
      */
-    public function save_with_high_quality(string $pathfile, int $fps)
+    public function save_with_high_quality(string $pathfile, int $fps,FormatInterface $format)
     {
         /**
          * @see http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
@@ -176,18 +179,27 @@ class Gif extends AbstractMediaType
 
         $commands_2 = array_merge($commands_2, array($pathfile));
 
+        $listeners = null;
+        $totalPasses = $format->getPasses();
+        // generate a platte
         try {
-            $this->driver->command($commands);
+            if ($format instanceof ProgressableInterface) {
+                $listeners = $format->createProgressListener($this, $this->ffprobe, 1, $totalPasses);
+            }
+            $this->driver->command($commands,false,$listeners);
         } catch (ExecutionFailureException $e) {
             $this->cleanupTemporaryFile($pathfile);
             throw new RuntimeException('Unable to generate palette', $e->getCode(), $e);
         }
-
+        // encode to gif with platte
         try {
-            $this->driver->command($commands_2);
-        } catch (ExecutionFailureException $e) {
+            if ($format instanceof ProgressableInterface) {
+                $listeners = $format->createProgressListener($this, $this->ffprobe, 2, $totalPasses);
+            }
+            $this->driver->command($commands_2, false, $listeners);
+        }catch (\Exception $e){
             $this->cleanupTemporaryFile($pathfile);
-            throw new RuntimeException('Unable to save gif', $e->getCode(), $e);
+            throw new RuntimeException('Unable to encode to gif', $e->getCode(), $e);
         }
         $this->cleanupTemporaryFile($palette);
 
