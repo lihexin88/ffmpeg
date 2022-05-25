@@ -145,11 +145,8 @@ class Gif extends AbstractMediaType
      * @param int $fps
      * @return $this
      */
-    public function save_with_high_quality(string $pathfile, int $fps,FormatInterface $format)
+    public function save_with_high_quality(string $pathfile, int $fps,FormatInterface $format = null)
     {
-        /**
-         * @see http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
-         */
 
         $filters = "fps=$fps,scale=".$this->dimension->getWidth().":-1:flags=lanczos";
         $fileMd5 = md5_file($this->pathfile);
